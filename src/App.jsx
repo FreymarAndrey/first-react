@@ -9,7 +9,7 @@ import React from "react";
 const defaultTodos = [
   { text: "cortar cebolla", completed: true },
   { text: "curso de react", completed: false },
-  { text: "curso introductorio", completed: true },
+  { text: "curso introdución", completed: true },
   { text: "React web", completed: false },
 ];
 
@@ -20,7 +20,33 @@ const App = () => {
   const completedTodos = todos.filter((todo) => !!todo.completed).length;
   const totalTodos = todos.length;
 
-  console.log("los usuarios buscan todos de" + searchValue);
+  const searchedTodos = todos.filter((todo) => {
+    // función texto sin tildes
+    const noTildes = (text) => {
+      return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    };
+
+    // Normalizando texto sin tildes y a Lower Case
+    const TodoTextLC = noTildes(todo.text.toLowerCase());
+    const searchTextLC = noTildes(searchValue.toLowerCase());
+
+    //renderizar con filtro
+    return TodoTextLC.includes(searchTextLC);
+  });
+
+  const completeTodo = (text) => {
+    const newTodos = [...todos];
+    const todoIndex = newTodos.findIndex((todo) => todo.text == text);
+    newTodos[todoIndex].completed = true;
+    setTodos(newTodos);
+  };
+
+  const deleteTodo = (text) => {
+    const newTodos = [...todos];
+    const todoIndex = newTodos.findIndex((todo) => todo.text == text);
+    newTodos.splice(todoIndex, 1);
+    setTodos(newTodos);
+  };
 
   return (
     <>
@@ -28,12 +54,14 @@ const App = () => {
       <TodoSearch SearchValue={searchValue} setSearchValue={setSearchValue} />
 
       <TodoList>
-        {defaultTodos.map((todo, i) => (
+        {searchedTodos.map((todo, i) => (
           <TodoItem
             key={todo.text}
             text={todo.text}
             completed={todo.completed}
             number={i + 1}
+            onComplete={() => completeTodo(todo.text)}
+            onDelete={() => deleteTodo(todo.text)}
           />
         ))}
       </TodoList>
